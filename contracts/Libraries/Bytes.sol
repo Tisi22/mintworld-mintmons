@@ -4,7 +4,6 @@ pragma solidity ^0.8.0;
 
 library Bytes {
 
-
     struct DataURI{
         string name;
         string image;  
