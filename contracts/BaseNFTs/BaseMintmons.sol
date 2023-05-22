@@ -37,6 +37,8 @@ contract BaseMintmons is MintmonsUriStorage, ERC2981, Ownable {
     function _metadataUpdateParty(uint256 tokenID, bytes calldata data) external {
         require(controllers[msg.sender], "Not authorized");
         _updateMetadata(tokenID, data);
+
+        emit MintmonMetadataUpdate(tokenID);
     }
 
     //----- VIEW INFO FUNCTIONS -----//

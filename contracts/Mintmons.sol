@@ -29,8 +29,6 @@ contract Mintmons is EIP712, AccessControl, Ownable {
     bytes signature;
     }
 
-    event MintmonMetadataUpdate(uint256 indexed _tokenId);
-
 
     constructor(address minter, BaseMintmons _base) 
         EIP712(SIGNING_DOMAIN, SIGNATURE_VERSION) {
@@ -129,14 +127,8 @@ contract Mintmons is EIP712, AccessControl, Ownable {
         mintedFirstMintmon[adr] = val;
     }
 
-    /*function _encodeDataURI(NFTVoucher calldata voucher) public pure returns (bytes memory){
-        return abi.encodePacked(voucher.name, voucher.image, voucher.level, voucher.experience, voucher.tp, voucher.description, voucher.attack1, voucher.attack2, voucher.attack3, voucher.attack4);
-    }*/
-
-    function _encodeDataURI(NFTVoucher calldata voucher) public pure returns (bytes memory) {
-    return abi.encodePacked(voucher.image, voucher.data, voucher.stats);
-}
-
-   
+    function _encodeDataURI(NFTVoucher calldata voucher) internal pure returns (bytes memory) {
+    return abi.encode(voucher.image, voucher.data, voucher.stats);
+    }
 
 }
