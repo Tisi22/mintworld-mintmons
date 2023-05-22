@@ -79,10 +79,6 @@ abstract contract MintmonsUriStorage is ERC721 {
         uint256[2] memory stats;
 
         // Decode the data URI components
-        /*(image, encodedData) = abi.decode(encodedData, (string, bytes));
-        (data, encodedData) = abi.decode(encodedData, (bytes32[7], bytes));
-        (stats, ) = abi.decode(encodedData, (uint256[2], bytes));
-        */
         (image, data, stats) = abi.decode(encodedData, (string, bytes32[7], uint256[2]));
 
 

@@ -26,6 +26,9 @@ contract BaseMintmons is MintmonsUriStorage, ERC2981, Ownable {
       mintState = true;
     }
 
+    /**
+     * @dev Mints and NFT
+     */
     function mint(address to, bytes calldata data) external{
         require(controllers[msg.sender], "Not authorized");
         require(mintState, "Minting is paused");
@@ -34,6 +37,9 @@ contract BaseMintmons is MintmonsUriStorage, ERC2981, Ownable {
         _setTokenURI(_tokenId-1, data);
     }
 
+    /**
+     * @dev updates the metadata of a NFT
+     */
     function _metadataUpdateParty(uint256 tokenID, bytes calldata data) external {
         require(controllers[msg.sender], "Not authorized");
         _updateMetadata(tokenID, data);

@@ -19,6 +19,7 @@ contract Mintmons is EIP712, AccessControl, Ownable {
 
     mapping(address => bool) public mintedFirstMintmon;
 
+    //ERC721 smart contract
     BaseMintmons base;
 
     struct NFTVoucher {
@@ -36,6 +37,9 @@ contract Mintmons is EIP712, AccessControl, Ownable {
             base = _base;
     }
 
+    /// @notice Redeems an NFTVoucher for an actual NFT, creating it in the process.
+    /// @param redeemer The address of the account which will receive the NFT upon success.
+    /// @param voucher A signed NFTVoucher that describes the NFT to be redeemed.
     function redeemFirstMintmon(address redeemer, NFTVoucher calldata voucher) public {
         require(!mintedFirstMintmon[msg.sender], "already minted");
         // make sure signature is valid and get the address of the signer
@@ -52,9 +56,9 @@ contract Mintmons is EIP712, AccessControl, Ownable {
     }
 
 
-    /// @notice Redeems an NFTVoucher for an actual NFT, creating it in the process.
+    /// @notice Redeems an array of NFTVoucher for an actual NFT, creating it in the process.
     /// @param redeemer The address of the account which will receive the NFT upon success.
-    /// @param voucherArray A signed NFTVoucher that describes the NFT to be redeemed.
+    /// @param voucherArray A signed array of NFTVoucher that describes the NFT to be redeemed.
     function redeem(address redeemer, NFTVoucher[] calldata voucherArray) public {
 
         for (uint i = 0; i < voucherArray.length; i++) {
@@ -71,6 +75,8 @@ contract Mintmons is EIP712, AccessControl, Ownable {
         }  
     }
 
+    /// @notice Redeems an array of NFTVoucher for an actual NFT, updating the metadata.
+    /// @param voucherArray A signed array of NFTVoucher that describes the NFT to be updated.
     function metadataUpdateParty(NFTVoucher[] calldata voucherArray) public {
 
         for (uint i = 0; i < voucherArray.length; i++) {
@@ -114,7 +120,7 @@ contract Mintmons is EIP712, AccessControl, Ownable {
     /// @notice Verifies the signature for a given NFTVoucher, returning the address of the signer.
     /// @dev Will revert if the signature is invalid. Does not verify that the signer is authorized to mint NFTs.
     /// @param voucher An NFTVoucher describing an unminted NFT.
-    function _verify(NFTVoucher calldata voucher) public view returns (address) {
+    function _verify(NFTVoucher calldata voucher) internal view returns (address) {
         bytes32 digest = _hash(voucher);
         return ECDSA.recover(digest, voucher.signature);
     }
@@ -130,5 +136,11 @@ contract Mintmons is EIP712, AccessControl, Ownable {
     function _encodeDataURI(NFTVoucher calldata voucher) internal pure returns (bytes memory) {
     return abi.encode(voucher.image, voucher.data, voucher.stats);
     }
+
+    // Function to receive Canto. msg.data must be empty
+    receive() external payable {}
+
+    // Fallback function is called when msg.data is not empty
+    fallback() external payable {}
 
 }
