@@ -9,6 +9,8 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
 import {BaseMintmons} from "./BaseNFTs/BaseMintmons.sol";
+import {MintWorldToken} from "./Faucet/MintWorldToken.sol";
+
 
 
 contract Mintmons is EIP712, AccessControl, Ownable {
@@ -18,6 +20,9 @@ contract Mintmons is EIP712, AccessControl, Ownable {
 
 
     mapping(address => bool) public mintedFirstMintmon;
+
+    //ERC20 smart contract (MWG)
+    MintWorldToken mwgContract;
 
     //ERC721 smart contract
     BaseMintmons base;
@@ -31,10 +36,12 @@ contract Mintmons is EIP712, AccessControl, Ownable {
     }
 
 
-    constructor(address minter, BaseMintmons _base) 
+    constructor(address minter, BaseMintmons _base, MintWorldToken _mwgContract) 
         EIP712(SIGNING_DOMAIN, SIGNATURE_VERSION) {
         _setupRole(MINTER_ROLE, minter);
-            base = _base;
+        base = _base;
+        //mwgContract = MintWorldToken(_mwgContract);
+        mwgContract = _mwgContract;
     }
 
     /// @notice Redeems an NFTVoucher for an actual NFT, creating it in the process.
@@ -77,7 +84,7 @@ contract Mintmons is EIP712, AccessControl, Ownable {
 
     /// @notice Redeems an array of NFTVoucher for an actual NFT, updating the metadata.
     /// @param voucherArray A signed array of NFTVoucher that describes the NFT to be updated.
-    function metadataUpdateParty(NFTVoucher[] calldata voucherArray) public {
+    function metadataUpdateParty(NFTVoucher[] calldata voucherArray) public returns (bool) {
 
         for (uint i = 0; i < voucherArray.length; i++) {
 
@@ -93,7 +100,21 @@ contract Mintmons is EIP712, AccessControl, Ownable {
             base._metadataUpdateParty(voucherArray[i].tokenId, data);
 
         }
+        return true;
 
+    }
+
+    /// @notice Redeems an array of NFTVoucher for an actual NFT, updating the metadata.
+    /// @param voucherArray A signed array of NFTVoucher that describes the NFT to be updated.
+    /// @param amountMWG Amount of MWG to transfer.
+    function metadataUpdatePartyAndMWGTransfer(NFTVoucher[] calldata voucherArray, uint256 amountMWG) public {
+
+        require(metadataUpdateParty(voucherArray));
+        transferToken(amountMWG);
+    }
+
+    function transferToken(uint256 amountMWG) private {
+        mwgContract.transferFrom(address(mwgContract), msg.sender, amountMWG);
     }
 
     function _hash(NFTVoucher calldata voucher) internal view returns (bytes32) {

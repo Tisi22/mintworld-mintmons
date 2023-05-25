@@ -10,13 +10,18 @@ async function deploy() {
   const basenft = await BaseNFT.deploy();
   const basenftAddress = basenft.address;
 
+  const TokenMWG = await ethers.getContractFactory("MintWorldToken");
+  const tokenMWG = await TokenMWG.deploy();
+  const tokenMWGAddress = tokenMWG.address;
+
   let factory = await ethers.getContractFactory("Mintmons", minter)
-  const contract = await factory.deploy(minter.address, basenftAddress)
+  const contract = await factory.deploy(minter.address, basenftAddress, tokenMWG.address)
 
   // the redeemerContract is an instance of the contract that's wired up to the redeemer's signing key
   const redeemerFactory = factory.connect(redeemer)
   const redeemerContract = redeemerFactory.attach(contract.address)
   await basenft.addController(contract.address);
+  await tokenMWG.approveSpenderContract(contract.address, 100000000000000);
 
   return {
     minter,
@@ -24,6 +29,7 @@ async function deploy() {
     contract,
     redeemerContract,
     basenft,
+    tokenMWG,
   }
 }
 
@@ -42,11 +48,16 @@ describe("Deploy", function() {
     const basenftAddress = basenft.address;
     console.log(basenftAddress)
 
+    const TokenMWG = await ethers.getContractFactory("MintWorldToken");
+    const tokenMWG = await TokenMWG.deploy();
+    const tokenMWGAddress = tokenMWG.address;
+    console.log(tokenMWGAddress)
+
     const signers = await ethers.getSigners();
     const minter = signers[0].address;
     
     const Mintmons = await ethers.getContractFactory("Mintmons");
-    const mintmons = await Mintmons.deploy(minter, basenftAddress);
+    const mintmons = await Mintmons.deploy(minter, basenftAddress, tokenMWGAddress);
     await mintmons.deployed();
     console.log(mintmons.address)
 
@@ -63,11 +74,16 @@ describe("Mintmons", function() {
     const basenftAddress = basenft.address;
     console.log(basenftAddress)
 
+    const TokenMWG = await ethers.getContractFactory("MintWorldToken");
+    const tokenMWG = await TokenMWG.deploy();
+    const tokenMWGAddress = tokenMWG.address;
+    console.log(tokenMWGAddress)
+
     const signers = await ethers.getSigners();
     const minter = signers[0].address;
     
     const Mintmons = await ethers.getContractFactory("Mintmons");
-    const mintmons = await Mintmons.deploy(minter, basenftAddress);
+    const mintmons = await Mintmons.deploy(minter, basenftAddress, tokenMWGAddress);
     await mintmons.deployed();
     console.log(mintmons.address)
 
@@ -79,7 +95,7 @@ describe("Mintmons", function() {
 
   it("Should redeem an NFT from a signed voucher", async function() {
   
-    const { contract, redeemerContract, redeemer, minter, basenft } = await deploy()
+    const { contract, redeemerContract, redeemer, minter, basenft, tokenMWG } = await deploy()
 
     const lazyMinter = new LazyMinter({ contract, signer: minter })
     
@@ -106,7 +122,7 @@ describe("Mintmons", function() {
 
   it("Should redeem seven NFTs from signed vouchers", async function() {
   
-    const { contract, redeemerContract, redeemer, minter, basenft } = await deploy()
+    const { contract, redeemerContract, redeemer, minter, basenft, tokenMWG } = await deploy()
 
     const lazyMinter = new LazyMinter({ contract, signer: minter })
     
@@ -152,7 +168,7 @@ describe("Mintmons", function() {
 
   it("Should show the tokenURI", async function() {
   
-    const { contract, redeemerContract, redeemer, minter, basenft } = await deploy()
+    const { contract, redeemerContract, redeemer, minter, basenft, tokenMWG } = await deploy()
 
     const lazyMinter = new LazyMinter({ contract, signer: minter })
     
@@ -181,7 +197,7 @@ describe("Mintmons", function() {
 
   it("Should Update Metadata of two NFTs", async function() {
   
-    const { contract, redeemerContract, redeemer, minter, basenft } = await deploy()
+    const { contract, redeemerContract, redeemer, minter, basenft, tokenMWG } = await deploy()
 
     const lazyMinter = new LazyMinter({ contract, signer: minter })
     
@@ -212,7 +228,7 @@ describe("Mintmons", function() {
 
   it("Should mint the first Mintmon", async function() {
   
-    const { contract, redeemerContract, redeemer, minter, basenft } = await deploy()
+    const { contract, redeemerContract, redeemer, minter, basenft, tokenMWG } = await deploy()
 
     const lazyMinter = new LazyMinter({ contract, signer: minter })
     
@@ -231,7 +247,7 @@ describe("Mintmons", function() {
 
   it("Should failed to mint the first Mintmon", async function() {
   
-    const { contract, redeemerContract, redeemer, minter, basenft } = await deploy()
+    const { contract, redeemerContract, redeemer, minter, basenft, tokenMWG } = await deploy()
 
     const lazyMinter = new LazyMinter({ contract, signer: minter })
     
@@ -249,6 +265,41 @@ describe("Mintmons", function() {
     await expect(redeemerContract.redeemFirstMintmon(redeemerAddress, voucher))
     .to.be.revertedWith("already minted");
   });
-   
+
+  it("Should Update Metadata of two NFTs and send MWG", async function() {
+  
+    const { contract, redeemerContract, redeemer, minter, basenft, tokenMWG } = await deploy()
+
+    const lazyMinter = new LazyMinter({ contract, signer: minter })
+    
+    // Create the voucher
+    const voucher1 = await lazyMinter.createVoucher(1,"Firefy",5,3,"ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi","Fire","A Mintmon","bpmb", "-", "-","-")
+    const voucher2 = await lazyMinter.createVoucher(2,"Stoney",7,1,"ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi","Stone","A Mintmon","abcd", "-", "-","-")
+
+    const voucherArray = [voucher1, voucher2];
+    console.log("voucherArray:", voucherArray)
+
+
+    // Get the redeemer's address
+    const redeemerAddress = await redeemer.getAddress()
+
+    await redeemerContract.redeem(redeemerAddress, voucherArray)
+    await tokenMWG.mint(tokenMWG.address, 10000)
+
+    const voucher1Metadata = await lazyMinter.createVoucher(1,"Firefy",8,1,"ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi","Fire","A Mintmon","bpmb", "ttt", "-","-")
+    const voucher2Metadata = await lazyMinter.createVoucher(2,"Stoney",10,7,"ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi","Stone","A Mintmon","abcd", "rrr", "-","-")
+    const voucherArrayMetadata = [voucher1Metadata, voucher2Metadata]
+
+    // Try to redeem the voucher
+    await expect(redeemerContract.metadataUpdatePartyAndMWGTransfer(voucherArrayMetadata, 1000))
+    .to.emit(basenft, 'MintmonMetadataUpdate')
+      .withArgs(voucher1Metadata.tokenId)
+    .to.emit(basenft, 'MintmonMetadataUpdate')
+      .withArgs(voucher2Metadata.tokenId)
+    .to.emit(tokenMWG, 'Transfer')
+      .withArgs(tokenMWG.address, redeemerAddress, 1000)
+    
+  });
+
 });
 
