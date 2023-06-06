@@ -30,7 +30,8 @@ contract Mintmons is EIP712, AccessControl, Ownable {
     struct NFTVoucher {
     uint256 tokenId;
     string image;
-    bytes32[7] data;
+    string description;
+    bytes32[6] data;
     uint256[2] stats;
     bytes signature;
     }
@@ -119,9 +120,10 @@ contract Mintmons is EIP712, AccessControl, Ownable {
 
     function _hash(NFTVoucher calldata voucher) internal view returns (bytes32) {
     return _hashTypedDataV4(keccak256(abi.encode(
-        keccak256("NFTVoucher(uint256 tokenId,string image,bytes32[7] data,uint256[2] stats)"),
+        keccak256("NFTVoucher(uint256 tokenId,string image,string description,bytes32[6] data,uint256[2] stats)"),
         voucher.tokenId,
         keccak256(bytes(voucher.image)),
+        keccak256(bytes(voucher.description)),
         keccak256(abi.encodePacked(voucher.data)),
         keccak256(abi.encodePacked(voucher.stats))
     )));
@@ -155,7 +157,7 @@ contract Mintmons is EIP712, AccessControl, Ownable {
     }
 
     function _encodeDataURI(NFTVoucher calldata voucher) internal pure returns (bytes memory) {
-    return abi.encode(voucher.image, voucher.data, voucher.stats);
+    return abi.encode(voucher.image, voucher.description, voucher.data, voucher.stats);
     }
 
     // Function to receive Canto. msg.data must be empty

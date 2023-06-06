@@ -8,12 +8,13 @@ abstract contract MintmonsUriStorage is ERC721 {
 
     mapping (uint256 => bytes) mintmonsURI;
 
-    //data: Name, description, type, attack1, attack2, attack3, attcak4
+    //data: Name, type, attack1, attack2, attack3, attcak4
     //stats: level, experience
 
     struct DataURI{
         string image;
-        bytes32[7] data;
+        string description;
+        bytes32[6] data;
         uint256[2] stats;
     }
 
@@ -32,21 +33,21 @@ abstract contract MintmonsUriStorage is ERC721 {
                 string(
                     abi.encodePacked(
                         '{"name": "', bytes32ToString(data_.data[0]),
-                        '","description":"',bytes32ToString(data_.data[1]), 
+                        '","description":"',data_.description, 
                         '", "image": "', data_.image,
                         '", "level": "', Strings.toString(data_.stats[0]),
                         '", "experience": "', Strings.toString(data_.stats[1]),
                         '", "tokenId": "', Strings.toString(tokenId),
                         '","attributes": [ { "trait_type": "Type", "value": "',
-                        bytes32ToString(data_.data[2]),
+                        bytes32ToString(data_.data[1]),
                         '"}, { "trait_type": "Attack_1", "value": ',
-                        bytes32ToString(data_.data[3]),
+                        bytes32ToString(data_.data[2]),
                         '"}, { "trait_type": "Attack_2", "value": ',
-                        bytes32ToString(data_.data[4]),
+                        bytes32ToString(data_.data[3]),
                         '"}, { "trait_type": "Attack_3", "value": ',
-                        bytes32ToString(data_.data[5]),
+                        bytes32ToString(data_.data[4]),
                         '"}, { "trait_type": "Attack_4", "value": ',
-                        bytes32ToString(data_.data[6]),
+                        bytes32ToString(data_.data[5]),
                         "} ]}"
                     )
 
@@ -75,15 +76,16 @@ abstract contract MintmonsUriStorage is ERC721 {
 
     function _decodeDataURI(bytes memory encodedData) internal pure returns (DataURI memory) {
         string memory image;
-        bytes32[7] memory data;
+        string memory description;
+        bytes32[6] memory data;
         uint256[2] memory stats;
 
         // Decode the data URI components
-        (image, data, stats) = abi.decode(encodedData, (string, bytes32[7], uint256[2]));
+        (image, description, data, stats) = abi.decode(encodedData, (string, string, bytes32[6], uint256[2]));
 
 
         // Create and return the DataURI struct
-        return DataURI(image, data, stats);
+        return DataURI(image, description, data, stats);
     }
 
 
