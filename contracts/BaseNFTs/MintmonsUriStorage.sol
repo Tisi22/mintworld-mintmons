@@ -32,24 +32,24 @@ abstract contract MintmonsUriStorage is ERC721 {
             bytes(
                 string(
                     abi.encodePacked(
-                        '{"name": "', bytes32ToString(data_.data[0]),
-                        '","description":"',data_.description, 
-                        '", "image": "', data_.image,
-                        '", "level": "', Strings.toString(data_.stats[0]),
-                        '", "experience": "', Strings.toString(data_.stats[1]),
-                        '", "tokenId": "', Strings.toString(tokenId),
-                        '","attributes": [ { "trait_type": "Type", "value": "',
-                        bytes32ToString(data_.data[1]),
-                        '"}, { "trait_type": "Attack_1", "value": ',
-                        bytes32ToString(data_.data[2]),
-                        '"}, { "trait_type": "Attack_2", "value": ',
-                        bytes32ToString(data_.data[3]),
-                        '"}, { "trait_type": "Attack_3", "value": ',
-                        bytes32ToString(data_.data[4]),
-                        '"}, { "trait_type": "Attack_4", "value": ',
-                        bytes32ToString(data_.data[5]),
-                        "} ]}"
-                    )
+                    '{"name": "', bytes32ToString(data_.data[0]),
+                    '","description":"',data_.description, 
+                    '", "image": "', data_.image,
+                    '", "level": "', Strings.toString(data_.stats[0]),
+                    '", "experience": "', Strings.toString(data_.stats[1]),
+                    '", "tokenId": "', Strings.toString(tokenId),
+                    '","attributes": [ { "trait_type": "Type", "value": "',
+                    bytes32ToString(data_.data[1]),
+                    '"}, { "trait_type": "Attack_1", "value": "',
+                    bytes32ToString(data_.data[2]),                
+                    '"}, { "trait_type": "Attack_2", "value": "',
+                    bytes32ToString(data_.data[3]),                
+                    '"}, { "trait_type": "Attack_3", "value": "',
+                    bytes32ToString(data_.data[4]),                
+                    '"}, { "trait_type": "Attack_4", "value": "',
+                    bytes32ToString(data_.data[5]),                
+                    '"} ]}'
+                )
 
                 )
             )
