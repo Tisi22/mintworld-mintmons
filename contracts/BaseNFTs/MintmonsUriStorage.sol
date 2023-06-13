@@ -35,8 +35,6 @@ abstract contract MintmonsUriStorage is ERC721 {
                     '{"name": "', bytes32ToString(data_.data[0]),
                     '","description":"',data_.description, 
                     '", "image": "', data_.image,
-                    '", "level": "', Strings.toString(data_.stats[0]),
-                    '", "experience": "', Strings.toString(data_.stats[1]),
                     '", "tokenId": "', Strings.toString(tokenId),
                     '","attributes": [ { "trait_type": "Type", "value": "',
                     bytes32ToString(data_.data[1]),
@@ -47,7 +45,11 @@ abstract contract MintmonsUriStorage is ERC721 {
                     '"}, { "trait_type": "Attack_3", "value": "',
                     bytes32ToString(data_.data[4]),                
                     '"}, { "trait_type": "Attack_4", "value": "',
-                    bytes32ToString(data_.data[5]),                
+                    bytes32ToString(data_.data[5]),
+                    '"}, { "trait_type": "Level", "value": "',
+                    Strings.toString(data_.stats[0]),
+                    '"}, { "trait_type": "EXP", "value": "',
+                    Strings.toString(data_.stats[1]),                
                     '"} ]}'
                 )
 
@@ -63,12 +65,6 @@ abstract contract MintmonsUriStorage is ERC721 {
     }
 
     function _setTokenURI(uint256 tokenId, bytes memory _data) internal virtual {
-        require(_exists(tokenId), "Token ID does not exist");
-
-        mintmonsURI[tokenId] = _data;
-    }
-
-    function _updateMetadata(uint256 tokenId, bytes memory _data) internal virtual {
         require(_exists(tokenId), "Token ID does not exist");
 
         mintmonsURI[tokenId] = _data;
