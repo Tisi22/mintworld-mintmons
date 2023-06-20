@@ -12,7 +12,6 @@ import {BaseMintmons} from "./BaseNFTs/BaseMintmons.sol";
 import {MintWorldToken} from "./Faucet/MintWorldToken.sol";
 
 
-
 contract Mintmons is EIP712, AccessControl, Ownable {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     string private constant SIGNING_DOMAIN = "Mintmon-Voucher";
