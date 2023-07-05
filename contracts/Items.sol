@@ -4,30 +4,37 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Burnable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {Math} from "./libraries/Math.sol";
-
-interface MintWorldToken {
-    function transferFrom(address from, address to, uint256 amount) external returns (bool);
-    function decimals() external view returns (uint8);
-    function balanceOf(address account) external view returns (uint256);
-}
 
 contract Items is ERC1155, Ownable, ERC1155Burnable {
 
-    MintWorldToken mwgContract;
+    IERC20 mwgContract;
+
+    IERC20 usdcContract;
 
     address usedMWG;
 
+    address mintWorld;
+
+    string private _uri;
+
     mapping(uint256 => uint256) prices;
+
+    uint256 public starterPackPrice;
 
     mapping(uint256 => bool) tokenIds;
 
-    constructor(address _mwgContract) ERC1155("") {
-        mwgContract = MintWorldToken(_mwgContract);
+    constructor(address _mwgContract, address _usdcContract, uint256 _starterPackPrice, address _mintWorld) ERC1155("") {
+        mwgContract = IERC20(_mwgContract);
+        usdcContract = IERC20(_usdcContract);
+        starterPackPrice = _starterPackPrice;
+        mintWorld = _mintWorld;
     }
 
     function setURI(string memory newuri) public onlyOwner {
-        _setURI(newuri);
+        _uri = newuri;
     }
 
     function setPrices(uint256 tokenId, uint256 price) public onlyOwner{
@@ -42,13 +49,29 @@ contract Items is ERC1155, Ownable, ERC1155Burnable {
         tokenIds[id] = val;
     }
 
+    function setNewUsdcContract(address _usdcContract) public onlyOwner{
+        usdcContract = IERC20(_usdcContract);
+    }
 
-    //Call approve function of MWGContract(spender this contract and amount valueMWG)
+    function setNewMwgContract(address _mwgContract) public onlyOwner{
+        mwgContract = IERC20(_mwgContract);
+    }
+
+    function setStarterPackPrice(uint256 _starterPackPrice) public onlyOwner{
+        starterPackPrice = _starterPackPrice;
+    }
+
+    function serMintWorldWallet(address _mintWorld) public onlyOwner{
+        mintWorld = _mintWorld;
+    }
+
+
+    //Call increaseAllowance function of MWGContract(spender this contract and amount valueMWG)
     function mint(uint256 id, uint256 amount, uint256 valueMWG)
         public
     {
         require(tokenIds[id], "TokenId no active");
-        require(mwgContract.balanceOf(msg.sender) >= Math.mul(valueMWG, 10**uint256(mwgContract.decimals())), "Not enough MWG");
+        require(mwgContract.balanceOf(msg.sender) >= Math.mul(valueMWG, 10**uint256(18)), "Not enough MWG");
         require(valueMWG >= prices[id]*amount, "Not enough MWG sent");
         
         // Transfer MWG tokens from the sender to usedMWG address
@@ -56,7 +79,7 @@ contract Items is ERC1155, Ownable, ERC1155Burnable {
         mwgContract.transferFrom(
             msg.sender,
             usedMWG,
-            Math.mul(valueMWG, 10**uint256(mwgContract.decimals()))
+            Math.mul(valueMWG, 10**uint256(18))
         ),
             "Failed to transfer MWG tokens"
         );
@@ -67,7 +90,7 @@ contract Items is ERC1155, Ownable, ERC1155Burnable {
     function mintAndBurn(uint256 id, uint256 amount, uint256 valueMWG, uint256 amountToBurn) public 
     {
         require(tokenIds[id], "TokenId no active");
-        require(mwgContract.balanceOf(msg.sender) >= Math.mul(valueMWG, 10**uint256(mwgContract.decimals())), "Not enough MWG");
+        require(mwgContract.balanceOf(msg.sender) >= Math.mul(valueMWG, 10**uint256(18)), "Not enough MWG");
         require(valueMWG >= prices[id]*amount, "Not enough MWG sent");
     
         // Transfer MWG tokens from the sender to usedMWG address
@@ -75,7 +98,7 @@ contract Items is ERC1155, Ownable, ERC1155Burnable {
         mwgContract.transferFrom(
             msg.sender,
             usedMWG,
-            Math.mul(valueMWG, 10**uint256(mwgContract.decimals()))
+            Math.mul(valueMWG, 10**uint256(18))
         ),
             "Failed to transfer MWG tokens"
         );
@@ -94,6 +117,35 @@ contract Items is ERC1155, Ownable, ERC1155Burnable {
             burn(msg.sender, ids[i], amounts[i]);
         }
         
+    }
+
+    //Call increaseAllowance function of UsdcContract(spender this contract and amount valueMWG)
+    function StarterPack() public {
+        require(usdcContract.balanceOf(msg.sender) >= Math.mul(starterPackPrice, 10**uint256(18)), "Not enough USDC");
+
+        // Transfer USDC tokens from the sender to MintWorld address
+        require(
+            usdcContract.transferFrom(
+                msg.sender,
+                mintWorld,
+                Math.mul(starterPackPrice, 10**uint256(18))
+            ),
+            "Failed to transfer USDC tokens"
+        );
+
+        uint256[] memory ids = new uint256[](2);
+        uint256[] memory amounts = new uint256[](2);
+        ids[0] = 1;
+        ids[1] = 2;
+        amounts[0] = 1;
+        amounts[1] = 5;
+
+        _mintBatch(msg.sender, ids, amounts, "");
+    }
+
+    function uri(uint256 tokenId) public view virtual override returns (string memory) {
+        string memory token = Strings.toString(tokenId);
+        return bytes(_uri).length > 0 ? string(abi.encodePacked(_uri, token, ".json")) : "";
     }
 
 }
