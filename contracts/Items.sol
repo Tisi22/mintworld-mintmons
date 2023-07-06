@@ -4,15 +4,15 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Burnable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {Math} from "./libraries/Math.sol";
 
 contract Items is ERC1155, Ownable, ERC1155Burnable {
 
-    IERC20 mwgContract;
+    ERC20 mwgContract;
 
-    IERC20 usdcContract;
+    ERC20 usdcContract;
 
     address usedMWG;
 
@@ -27,8 +27,8 @@ contract Items is ERC1155, Ownable, ERC1155Burnable {
     mapping(uint256 => bool) tokenIds;
 
     constructor(address _mwgContract, address _usdcContract, uint256 _starterPackPrice, address _mintWorld) ERC1155("") {
-        mwgContract = IERC20(_mwgContract);
-        usdcContract = IERC20(_usdcContract);
+        mwgContract = ERC20(_mwgContract);
+        usdcContract = ERC20(_usdcContract);
         starterPackPrice = _starterPackPrice;
         mintWorld = _mintWorld;
     }
@@ -50,11 +50,11 @@ contract Items is ERC1155, Ownable, ERC1155Burnable {
     }
 
     function setNewUsdcContract(address _usdcContract) public onlyOwner{
-        usdcContract = IERC20(_usdcContract);
+        usdcContract = ERC20(_usdcContract);
     }
 
     function setNewMwgContract(address _mwgContract) public onlyOwner{
-        mwgContract = IERC20(_mwgContract);
+        mwgContract = ERC20(_mwgContract);
     }
 
     function setStarterPackPrice(uint256 _starterPackPrice) public onlyOwner{
@@ -71,7 +71,7 @@ contract Items is ERC1155, Ownable, ERC1155Burnable {
         public
     {
         require(tokenIds[id], "TokenId no active");
-        require(mwgContract.balanceOf(msg.sender) >= Math.mul(valueMWG, 10**uint256(18)), "Not enough MWG");
+        require(mwgContract.balanceOf(msg.sender) >= Math.mul(valueMWG, 10**uint256(mwgContract.decimals())), "Not enough MWG");
         require(valueMWG >= prices[id]*amount, "Not enough MWG sent");
         
         // Transfer MWG tokens from the sender to usedMWG address
@@ -79,7 +79,7 @@ contract Items is ERC1155, Ownable, ERC1155Burnable {
         mwgContract.transferFrom(
             msg.sender,
             usedMWG,
-            Math.mul(valueMWG, 10**uint256(18))
+            Math.mul(valueMWG, 10**uint256(mwgContract.decimals()))
         ),
             "Failed to transfer MWG tokens"
         );
@@ -90,7 +90,7 @@ contract Items is ERC1155, Ownable, ERC1155Burnable {
     function mintAndBurn(uint256 id, uint256 amount, uint256 valueMWG, uint256 amountToBurn) public 
     {
         require(tokenIds[id], "TokenId no active");
-        require(mwgContract.balanceOf(msg.sender) >= Math.mul(valueMWG, 10**uint256(18)), "Not enough MWG");
+        require(mwgContract.balanceOf(msg.sender) >= Math.mul(valueMWG, 10**uint256(mwgContract.decimals())), "Not enough MWG");
         require(valueMWG >= prices[id]*amount, "Not enough MWG sent");
     
         // Transfer MWG tokens from the sender to usedMWG address
@@ -98,7 +98,7 @@ contract Items is ERC1155, Ownable, ERC1155Burnable {
         mwgContract.transferFrom(
             msg.sender,
             usedMWG,
-            Math.mul(valueMWG, 10**uint256(18))
+            Math.mul(valueMWG, 10**uint256(mwgContract.decimals()))
         ),
             "Failed to transfer MWG tokens"
         );
@@ -121,14 +121,14 @@ contract Items is ERC1155, Ownable, ERC1155Burnable {
 
     //Call increaseAllowance function of UsdcContract(spender this contract and amount valueMWG)
     function StarterPack() public {
-        require(usdcContract.balanceOf(msg.sender) >= Math.mul(starterPackPrice, 10**uint256(18)), "Not enough USDC");
+        require(usdcContract.balanceOf(msg.sender) >= Math.mul(starterPackPrice, 10**uint256(usdcContract.decimals())), "Not enough USDC");
 
         // Transfer USDC tokens from the sender to MintWorld address
         require(
             usdcContract.transferFrom(
                 msg.sender,
                 mintWorld,
-                Math.mul(starterPackPrice, 10**uint256(18))
+                Math.mul(starterPackPrice, 10**uint256(usdcContract.decimals()))
             ),
             "Failed to transfer USDC tokens"
         );
