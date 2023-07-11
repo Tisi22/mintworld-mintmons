@@ -8,11 +8,12 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {BaseMintmons} from "./BaseNFTs/BaseMintmons.sol";
 import {MintWorldToken} from "./Faucet/MintWorldToken.sol";
 
 
-contract Mintmons is EIP712, AccessControl, Ownable {
+contract Mintmons is EIP712, AccessControl, Ownable, ReentrancyGuard {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     string private constant SIGNING_DOMAIN = "Mintmon-Voucher";
     string private constant SIGNATURE_VERSION = "1";
@@ -47,7 +48,7 @@ contract Mintmons is EIP712, AccessControl, Ownable {
     /// @notice Redeems an NFTVoucher for an actual NFT, creating it in the process.
     /// @param redeemer The address of the account which will receive the NFT upon success.
     /// @param voucher A signed NFTVoucher that describes the NFT to be redeemed.
-    function redeemFirstMintmon(address redeemer, NFTVoucher calldata voucher) public {
+    function redeemFirstMintmon(address redeemer, NFTVoucher calldata voucher) public nonReentrant {
         require(!mintedFirstMintmon[msg.sender], "already minted");
         // make sure signature is valid and get the address of the signer
         address signer = _verify(voucher);
@@ -66,7 +67,7 @@ contract Mintmons is EIP712, AccessControl, Ownable {
     /// @notice Redeems an array of NFTVoucher for an actual NFT, creating it in the process.
     /// @param redeemer The address of the account which will receive the NFT upon success.
     /// @param voucherArray A signed array of NFTVoucher that describes the NFT to be redeemed.
-    function redeem(address redeemer, NFTVoucher[] calldata voucherArray) public {
+    function redeem(address redeemer, NFTVoucher[] calldata voucherArray) public nonReentrant{
 
         for (uint i = 0; i < voucherArray.length; i++) {
 
