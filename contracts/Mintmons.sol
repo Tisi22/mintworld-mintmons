@@ -8,8 +8,9 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {BaseMintmons} from "./BaseNFTs/BaseMintmons.sol";
-import {MintWorldToken} from "./Faucet/MintWorldToken.sol";
+
 
 
 contract Mintmons is EIP712, AccessControl, Ownable, ReentrancyGuard {
@@ -21,7 +22,7 @@ contract Mintmons is EIP712, AccessControl, Ownable, ReentrancyGuard {
     mapping(address => bool) public mintedFirstMintmon;
 
     //ERC20 smart contract (MWG)
-    MintWorldToken mwgContract;
+    ERC20 mwgContract;
 
     //ERC721 smart contract
     BaseMintmons base;
@@ -36,7 +37,7 @@ contract Mintmons is EIP712, AccessControl, Ownable, ReentrancyGuard {
     }
 
 
-    constructor(address minter, BaseMintmons _base, MintWorldToken _mwgContract) 
+    constructor(address minter, BaseMintmons _base, ERC20 _mwgContract) 
         EIP712(SIGNING_DOMAIN, SIGNATURE_VERSION) {
         _setupRole(MINTER_ROLE, minter);
         base = _base;
