@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
 import "hardhat/console.sol";
@@ -41,7 +41,6 @@ contract Mintmons is EIP712, AccessControl, Ownable, ReentrancyGuard {
         EIP712(SIGNING_DOMAIN, SIGNATURE_VERSION) {
         _setupRole(MINTER_ROLE, minter);
         base = _base;
-        //mwgContract = MintWorldToken(_mwgContract);
         mwgContract = _mwgContract;
     }
 
@@ -148,6 +147,10 @@ contract Mintmons is EIP712, AccessControl, Ownable, ReentrancyGuard {
         return ECDSA.recover(digest, voucher.signature);
     }
 
+    function _encodeDataURI(NFTVoucher calldata voucher) internal pure returns (bytes memory) {
+    return abi.encode(voucher.image, voucher.description, voucher.data, voucher.stats);
+    }
+
     function checkMintedFirstMintmon(address adr) public view returns(bool){
         return mintedFirstMintmon[adr];
     }
@@ -156,11 +159,7 @@ contract Mintmons is EIP712, AccessControl, Ownable, ReentrancyGuard {
         mintedFirstMintmon[adr] = val;
     }
 
-    function _encodeDataURI(NFTVoucher calldata voucher) internal pure returns (bytes memory) {
-    return abi.encode(voucher.image, voucher.description, voucher.data, voucher.stats);
-    }
-
-    // Function to receive Canto. msg.data must be empty
+    // Function to receive Matic. msg.data must be empty
     receive() external payable {}
 
     // Fallback function is called when msg.data is not empty

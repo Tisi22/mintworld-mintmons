@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-
-library Math {
+library MathInt {
 
     function mul(uint256 a, uint256 b) internal pure returns (uint256) {
         if (a == 0) {

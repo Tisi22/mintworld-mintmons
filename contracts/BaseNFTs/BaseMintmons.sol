@@ -1,6 +1,5 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
-pragma abicoder v2;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
@@ -136,7 +135,7 @@ contract BaseMintmons is MintmonsUriStorage, ERC2981, Ownable {
 
     //----- END -----//
 
-    // Function to receive Canto. msg.data must be empty
+    // Function to receive Matic. msg.data must be empty
     receive() external payable {}
 
     // Fallback function is called when msg.data is not empty

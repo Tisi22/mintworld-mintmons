@@ -8,9 +8,6 @@ abstract contract MintmonsUriStorage is ERC721 {
 
     mapping (uint256 => bytes) mintmonsURI;
 
-    //data: Name, type, attack1, attack2, attack3, attcak4
-    //stats: level, experience
-
     struct DataURI{
         string image;
         string description;
@@ -76,11 +73,8 @@ abstract contract MintmonsUriStorage is ERC721 {
         bytes32[6] memory data;
         uint256[2] memory stats;
 
-        // Decode the data URI components
         (image, description, data, stats) = abi.decode(encodedData, (string, string, bytes32[6], uint256[2]));
 
-
-        // Create and return the DataURI struct
         return DataURI(image, description, data, stats);
     }
 
