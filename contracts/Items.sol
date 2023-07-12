@@ -22,7 +22,7 @@ contract Items is ERC1155, Ownable, ERC1155Burnable {
     // Address to transfer the USDC when the starterPack is bought
     address mintWorld;
 
-    string _uri;
+    string _uri_;
 
     mapping(uint256 => uint256) prices;
 
@@ -42,7 +42,7 @@ contract Items is ERC1155, Ownable, ERC1155Burnable {
     //----- SET FUNCTIONS -----//
 
     function setURI(string memory newuri) public onlyOwner {
-        _uri = newuri;
+        _uri_ = newuri;
     }
 
     function setPrices(uint256 tokenId, uint256 price) public onlyOwner{
@@ -164,7 +164,7 @@ contract Items is ERC1155, Ownable, ERC1155Burnable {
 
     function uri(uint256 tokenId) public view virtual override returns (string memory) {
         string memory token = Strings.toString(tokenId);
-        return bytes(_uri).length > 0 ? string(abi.encodePacked(_uri, token, ".json")) : "";
+        return bytes(_uri_).length > 0 ? string(abi.encodePacked(_uri_, token, ".json")) : "";
     }
 
     //----- END -----//
@@ -174,5 +174,9 @@ contract Items is ERC1155, Ownable, ERC1155Burnable {
 
     // Fallback function is called when msg.data is not empty
     fallback() external payable {}
+
+    function withdraw() public onlyOwner {
+        payable(msg.sender).transfer(address(this).balance);
+    }
 
 }

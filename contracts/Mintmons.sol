@@ -22,10 +22,10 @@ contract Mintmons is EIP712, AccessControl, Ownable, ReentrancyGuard {
     mapping(address => bool) public mintedFirstMintmon;
 
     //ERC20 smart contract (MWG)
-    ERC20 mwgContract;
+    ERC20 immutable mwgContract;
 
     //ERC721 smart contract
-    BaseMintmons base;
+    BaseMintmons immutable base;
 
     struct NFTVoucher {
     uint256 tokenId;
@@ -114,7 +114,7 @@ contract Mintmons is EIP712, AccessControl, Ownable, ReentrancyGuard {
     }
 
     function transferToken(uint256 amountMWG) private {
-        mwgContract.transferFrom(address(mwgContract), msg.sender, amountMWG);
+        require(mwgContract.transferFrom(address(mwgContract), msg.sender, amountMWG));
     }
 
     function _hash(NFTVoucher calldata voucher) internal view returns (bytes32) {
@@ -164,5 +164,9 @@ contract Mintmons is EIP712, AccessControl, Ownable, ReentrancyGuard {
 
     // Fallback function is called when msg.data is not empty
     fallback() external payable {}
+
+    function withdraw() public onlyOwner {
+        payable(msg.sender).transfer(address(this).balance);
+    }
 
 }

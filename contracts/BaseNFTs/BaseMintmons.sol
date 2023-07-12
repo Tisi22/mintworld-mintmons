@@ -51,9 +51,9 @@ contract BaseMintmons is MintmonsUriStorage, ERC2981, Ownable {
     /**
      * @dev Returns all the tokenIds of a wallet
      */
-    function walletOfOwner(address _owner) public view returns (uint256[] memory)
+    function walletOfOwner(address _owner_) public view returns (uint256[] memory)
     {
-        uint256 ownerTokenCount = balanceOf(_owner);
+        uint256 ownerTokenCount = balanceOf(_owner_);
         uint256[] memory ownedTokenIds = new uint256[](ownerTokenCount);
         uint256 currentTokenId = 1;
         uint256 ownedTokenIndex = 0;
@@ -61,7 +61,7 @@ contract BaseMintmons is MintmonsUriStorage, ERC2981, Ownable {
         while (ownedTokenIndex < ownerTokenCount && currentTokenId <= totalSupply()) {
         address currentTokenOwner = ownerOf(currentTokenId);
 
-        if (currentTokenOwner == _owner) {
+        if (currentTokenOwner == _owner_) {
             ownedTokenIds[ownedTokenIndex] = currentTokenId;
 
             ownedTokenIndex++;
@@ -140,6 +140,10 @@ contract BaseMintmons is MintmonsUriStorage, ERC2981, Ownable {
 
     // Fallback function is called when msg.data is not empty
     fallback() external payable {}
+
+    function withdraw() public onlyOwner {
+        payable(msg.sender).transfer(address(this).balance);
+    }
 
     
 }
