@@ -77,7 +77,6 @@ contract Items is ERC1155, Ownable, ERC1155Burnable {
 
     //----- MINT AND BURN -----//
 
-    //Call increaseAllowance function of MWGContract(spender this contract and amount valueMWG)
     function mint(uint256 id, uint256 amount, uint256 valueMWG)
         public
     {
@@ -134,7 +133,6 @@ contract Items is ERC1155, Ownable, ERC1155Burnable {
 
     //----- STARTER PACK -----//
 
-    //Call increaseAllowance function of UsdcContract(spender this contract and amount starterPack Price)
     function StarterPack() public {
         require(usdcContract.balanceOf(msg.sender) >= MathInt.mul(starterPackPrice, 10**uint256(usdcContract.decimals())), "Not enough USDC");
 

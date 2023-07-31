@@ -12,7 +12,7 @@ contract BaseMintmons is MintmonsUriStorage, ERC2981, Ownable {
     uint256 _tokenId;
     bool public mintState;
 
-    // A map of addresses that are authorised to mint and update metadata.
+    //Mapping of addresses that are authorised to mint and update metadata.
     mapping(address => bool) public controllers;
 
 
